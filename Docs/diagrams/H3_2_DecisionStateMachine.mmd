@@ -1,0 +1,19 @@
+flowchart TD
+    T([Decision tick every 0.25 s]) --> B{Busy coroutine running?<br/>Eating / Mating / Resting}
+    B -- yes --> I{Herbivore AND threat seen?}
+    I -- yes --> X[Interrupt coroutine] --> D1
+    I -- no --> W([wait for coroutine end])
+    B -- no --> D1{Threat in sense range?}
+    D1 -- yes --> F[FLEEING<br/>run away - rabbit zig-zag<br/>deer alert herd]
+    D1 -- no --> D2{Hungry? energy below threshold}
+    D2 -- yes --> D3{Food sensed?}
+    D3 -- herbivore --> S[SEEKING FOOD<br/>walk to plant]
+    D3 -- carnivore --> H[HUNTING<br/>run - fox stalk/pounce<br/>wolf calls pack]
+    D2 -- no --> D4{Ready to mate?<br/>adult, energy high, no cooldown}
+    D3 -- none --> D4
+    D4 -- partner found --> M[SEEKING MATE]
+    D4 -- no --> WA[WANDERING<br/>random point / herd centre]
+    S -- contact --> E[EATING coroutine]
+    H -- contact --> E
+    H -- chase longer than stamina --> R[RESTING coroutine]
+    M -- contact --> MA[MATING coroutine<br/>spawn babies + cooldown]

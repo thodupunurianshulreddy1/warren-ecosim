@@ -1,0 +1,73 @@
+classDiagram
+    direction TB
+    class MonoBehaviour
+    class SimEntity {
+      <<abstract>>
+      #bool isAlive
+      #float age
+      +Species Species*
+      +Die(cause) virtual
+      #ShrinkAndDestroyRoutine() coroutine
+      +GetStatusText() virtual
+    }
+    class IEdible {
+      <<interface>>
+      +bool CanBeEaten
+      +float GetEaten(eater)
+    }
+    class Plant {
+      -float growth
+      -GrowRoutine() coroutine
+      -SpreadSeed()
+    }
+    class Animal {
+      <<abstract>>
+      #AnimalStats stats
+      #AgentState state
+      #float energy
+      #CreateDefaultStats()* 
+      #SenseFood()*
+      #DecideNextAction() virtual
+      #ExecuteCurrentState() virtual
+      #SenseThreat() virtual
+      #GetFleeDirection() virtual
+      #GetLitterSize() virtual
+      #MoveTowards() / FaceDirection()
+      -EatRoutine() / MatingRoutine() coroutines
+    }
+    class Herbivore {
+      <<abstract>>
+      #SenseFood() override : Plant
+      #SenseThreat() override : Carnivore
+      #IsDangerous() virtual
+    }
+    class Carnivore {
+      <<abstract>>
+      +IsThreatening virtual
+      +DetectionRangeMultiplier virtual
+      #ScorePrey() virtual
+      #CanHunt() virtual
+      #ExecuteCurrentState() override : stamina
+    }
+    class Rabbit { zig-zag flee, hop, random litter }
+    class Deer { herd cohesion, herd alarm, fears wolves only }
+    class Fox { stalk then pounce, rabbits only, stealth }
+    class Wolf { pack call, prefers deer }
+    class AnimalStats { <<Serializable data>> }
+    class SimulationManager { <<Singleton>> registry, spawning, census coroutines }
+    class SimUtils { <<static>> vectors, Random, search, colours }
+    class InputHelper { <<static>> }
+    MonoBehaviour <|-- SimEntity
+    SimEntity <|-- Plant
+    SimEntity <|-- Animal
+    Animal <|-- Herbivore
+    Animal <|-- Carnivore
+    Herbivore <|-- Rabbit
+    Herbivore <|-- Deer
+    Carnivore <|-- Fox
+    Carnivore <|-- Wolf
+    IEdible <|.. Plant
+    IEdible <|.. Herbivore
+    Animal *-- AnimalStats
+    SimulationManager o-- SimEntity : registers
+    Animal ..> SimUtils : uses

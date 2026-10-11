@@ -1,0 +1,19 @@
+stateDiagram-v2
+    [*] --> Title
+    Title --> Playing : Start (Enter / button)\nspawn burrows + founder, possess, StartCycle
+    Playing --> Paused : Esc / P (timeScale = 0)
+    Paused --> Playing : Esc / P
+    Paused --> Title : Back to title (reload)
+
+    state Playing {
+        [*] --> Controlling
+        Controlling --> LineageTransfer : possessed rabbit Died
+        LineageTransfer --> Controlling : heir found\n(generation + 1)
+    }
+
+    Playing --> GameOver : no warren rabbit left
+    Playing --> Victory : DayStarted(day > 7)
+    GameOver --> Playing : Play again (reload + auto start)
+    Victory --> Playing : Play again (reload + auto start)
+    GameOver --> Title
+    Victory --> Title

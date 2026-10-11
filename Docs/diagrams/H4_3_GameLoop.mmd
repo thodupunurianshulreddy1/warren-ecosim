@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph CORE["CORE LOOP (seconds)"]
+        direction TB
+        F[Forage: find grown grass] --> E[Eat 1.5 s<br/>frozen = exposed]
+        E --> M{Energy ≥ 75 %<br/>and adult?}
+        M -- yes --> B[Mate F<br/>babies join warren]
+        M -- no --> F
+        B --> F
+        F -. predator spotted .-> R[Sprint to a burrow<br/>stamina]
+        R --> H[Hidden: safe<br/>but starving]
+        H --> F
+    end
+
+    subgraph PROG["PROGRESSION LOOP (minutes)"]
+        direction TB
+        W[Warren grows] --> U[Unlocks:<br/>3 Thump · 6 Dig · 10 Swift Feet]
+        U --> S[Score, stars, best run]
+    end
+
+    subgraph TIME["TIME LOOP (one day = 60 s + night)"]
+        direction TB
+        D[Day: safer foraging] --> N[Night: predators see 35 % further,<br/>new predators arrive, night longer each day]
+        N --> D
+    end
+
+    B --> W
+    N -. pressure .-> R
+    X[Your rabbit dies] --> L{Warren adult left?}
+    L -- yes --> G[Control passes to heir<br/>generation + 1] --> F
+    L -- no --> O[Game over]
+    D -- day 8 --> V[Victory]

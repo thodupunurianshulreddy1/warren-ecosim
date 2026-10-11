@@ -1,0 +1,9 @@
+flowchart LR
+    G((Grass<br/>grows, spreads seeds)) -->|eaten by| R[Rabbit]
+    G -->|eaten by| D[Deer]
+    R -->|hunted by| F[Fox]
+    R -->|hunted by| W[Wolf]
+    D -->|hunted by, preferred| W
+    D -. ignores .-> F
+    W -. pack call .-> W
+    D -. herd alarm .-> D

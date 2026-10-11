@@ -1,0 +1,97 @@
+classDiagram
+    direction LR
+    %% ===== Homework 3 simulation (refactored) =====
+    class SimEntity {
+      <<abstract>>
+      +event Died(entity, cause)  [H4]
+      +Die(cause) virtual
+    }
+    class Animal {
+      <<abstract>>
+      #FindFood(range)*  [H4 was SenseFood]
+      #SenseFood() virtual
+      +SetPlayerControlled(on, lifespan)  [H4]
+      +SetMoveInput(dir, sprint, speed)  [H4]
+      +TryEatNearby(reach) / TryMateNearby(reach)  [H4]
+      +CancelBusyAction() / GetMatingBlocker()  [H4]
+      #OnOffspringBorn(baby, partner) virtual  [H4]
+    }
+    class Herbivore {
+      <<abstract>>
+      +ReceiveAlarm(threat) virtual  [H4 moved from Deer]
+      #AlertNearby~T~(threat, radius)  [H4]
+      +IsHidden virtual  [H4]
+    }
+    class Carnivore {
+      <<abstract>>
+      #SenseFood() override : x PredatorSenseMultiplier  [H4]
+    }
+    class Rabbit {
+      +JoinWarren()  [H4]
+      +IsWarrenMember  [H4]
+      +static WarrenLeader  [H4]
+      +static event JoinedWarren  [H4]
+      flee to burrow, sink when hidden
+    }
+    class Deer { herd alarm via AlertNearby }
+    class Fox { +IsStalking  [H4] }
+    class Wolf
+    class SimulationManager {
+      <<Singleton>>
+      +PredatorSenseMultiplier  [H4]
+      +PredatorSpeedMultiplier  [H4]
+      +SpawnAdult() / SpawnGroupAtArenaEdge()  [H4]
+    }
+    SimEntity <|-- Animal
+    Animal <|-- Herbivore
+    Animal <|-- Carnivore
+    Herbivore <|-- Rabbit
+    Herbivore <|-- Deer
+    Carnivore <|-- Fox
+    Carnivore <|-- Wolf
+
+    %% ===== Homework 4 game layer =====
+    class Burrow {
+      +static All / FindContaining() / FindClosest()
+      +Contains(point)
+    }
+    class DayNightCycle {
+      +Day / IsNight
+      +event DayStarted / NightStarted
+    }
+    class PlayerController {
+      +Possess(rabbit) / Release()
+      stamina, threat awareness, marker
+      +event Feedback
+    }
+    class PlayerAbilities {
+      +Unlock(ability) / TryUse(ability, user)
+      Thump, DigBurrow, SwiftFeet
+    }
+    class FollowCamera { +SetTarget() / ShowOverview() }
+    class GameManager {
+      <<Singleton>>
+      +State : GameState
+      +StartRun() / TogglePause() / RestartRun()
+      lineage transfer coroutine
+      difficulty + progression
+      +event Notification
+    }
+    class GameHUD { OnGUI, one screen per GameState }
+    class DifficultySettings { <<Serializable>> }
+    class ProgressionSettings { <<Serializable>> }
+    class RunRecord { <<Serializable>> saved with PlayerPrefs + JSON }
+
+    Rabbit ..> Burrow : IsHidden / flee target
+    PlayerController --> Rabbit : commands
+    PlayerController --> PlayerAbilities
+    PlayerAbilities ..> Burrow : digs
+    GameManager --> PlayerController
+    GameManager --> DayNightCycle : listens
+    GameManager --> SimulationManager : modifiers, spawns
+    GameManager --> FollowCamera
+    GameManager *-- DifficultySettings
+    GameManager *-- ProgressionSettings
+    GameManager *-- RunRecord
+    GameManager ..> SimEntity : listens Died
+    GameHUD ..> GameManager : reads, listens Notification
