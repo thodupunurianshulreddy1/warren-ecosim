@@ -6,6 +6,8 @@ The simulation came first: plants, rabbits, deer, foxes and wolves, each an auto
 
 The engineering problem this project is really about: **adding a game on top of a simulation without the simulation knowing the game exists.**
 
+![Layer architecture](Docs/diagrams/H4_Architecture.png)
+
 | | |
 |---|---|
 | **Language** | C# |
@@ -49,11 +51,7 @@ Step 2 is not optional, and it is the point. No prefabs, scenes, materials, mesh
 
 ## Architecture
 
-Everything lives under the `ThodupunuriAnshul.EcoSim` namespace, with sub-namespaces mirroring the folder layout. Dependencies point one way only:
-
-```
-Core  ←  Agents (+ Habitat)  ←  Player  ←  Game  ←  UI
-```
+Everything lives under the `ThodupunuriAnshul.EcoSim` namespace, with sub-namespaces mirroring the folder layout. Dependencies point one way only — `Core ← Agents (+ Habitat) ← Player ← Game ← UI` — as in the diagram above.
 
 ```
 Assets/Scripts/
@@ -69,7 +67,11 @@ Assets/Scripts/
 
 **Agents never reference the game layer.** They raise C# events — `SimEntity.Died`, `Rabbit.JoinedWarren`, `DayNightCycle.DayStarted` — and `GameManager` subscribes. This is why the original sandbox scene still runs unmodified against the same agent code that powers the game.
 
-Diagrams (Mermaid sources and rendered PNGs) are in [`Docs/diagrams/`](Docs/diagrams/): class diagram, decision state machine, food web, game state machine, game loop, and the layer architecture.
+Every agent inherits from `SimEntity` and eats according to a single food web, which `IEdible` enforces at the type level rather than through runtime tag checks:
+
+![Food web](Docs/diagrams/H3_3_FoodWeb.png)
+
+Mermaid sources and the remaining figures — class diagram, decision state machine, game state machine — are in [`Docs/diagrams/`](Docs/diagrams/).
 
 ---
 
@@ -88,6 +90,12 @@ The simulation existed before the game did. These are the changes that made a pl
 | World modifiers `PredatorSenseMultiplier`, `PredatorSpeedMultiplier` | `SimulationManager`, `Carnivore` | Difficulty curve without mutating per-species stats |
 | `Died` event | `SimEntity` | The game reacts to deaths without agents knowing a game is listening |
 | Scene builder split into `CreateBaseScene` + `CreateSandboxScene` / `CreateGameScene` | `EcoSimProjectBuilder` | Shared setup written once |
+
+### The run loop
+
+A run is seven nights. Days are for eating and breeding, nights are for surviving — and each night is longer than the last. When your rabbit dies, the run does not end: control transfers to one of its descendants, if the warren produced any.
+
+![Game loop](Docs/diagrams/H4_GameLoop.png)
 
 ### Game systems
 
